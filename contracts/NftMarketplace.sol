@@ -79,4 +79,8 @@ contract NftMarketplace{
             emit ItemListed(msg.sender , nftAddress , tokenId , price);
         }
     }
+
+    function buyItem(address nftAddress , uint256 tokenId) external payable{
+        
+    }
 }
