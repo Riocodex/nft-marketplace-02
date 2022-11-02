@@ -8,6 +8,8 @@ error NftMarketplace__PriceMustBeAboveZero();
 error NftMarketplace__NotApprovedForMarketPlace();
 error NftMarketplace__AlreadyListed(address nftAddress , uint256 tokenId);
 error NftMarketplace__NotOwner();
+error NftMarketplace__NotListed(address nftAddress , uint256 tokenId);
+error NftMarketplace__PriceNotMet(address nftAddress , uint256 tokenId , uint256 price);
 
 contract NftMarketplace{
 
@@ -47,6 +49,13 @@ contract NftMarketplace{
         }
         _;
     }
+
+    modifier isListed(address nftAddress , uint256 tokenId){
+        Listing memory listing = s_listings[nftAddress][tokenId];
+        if(listing.price <=0 ){
+            revert NftMarketplace__NotListed(nftAddress , tokenId);
+        }
+    }
         
     ///////////////////
     // MAIN FUNCTIONS //
@@ -81,6 +90,14 @@ contract NftMarketplace{
     }
 
     function buyItem(address nftAddress , uint256 tokenId) external payable{
-        
+        external
+        payable
+        isListed(nftAddress , tokenId)
+        {
+            Listing memory listedItem = s_listings[nftAddress][tokenId];
+            if(msg.value < listedItem.price){
+                revert NftMarketplace__PriceNotMet(nftAddress , tokenId , listedItem.price);
+            }
+        }
     }
 }
